@@ -6,6 +6,11 @@ import Events_Page from "./Pages/Events_Page";
 import User_Page from "./Pages/User_Page";
 import Organizer_Page from "./Pages/Organizer/Organizer_Page";
 import Organizer_New from "./Pages/Organizer/Organizer_New";
+import Categories_New from "./Pages/Categories/Categories_New";
+import Categories_Page from "./Pages/Categories/Categories_Page";
+import Events_Details from "./Pages/Events_Details";
+import Squad_new from "./Pages/Squad/Squad_new";
+import Squad_Page from "./Pages/Squad/Squad_Page";
 
 const App = () => {
   const [users, setUsers] = useState([
@@ -36,6 +41,12 @@ const App = () => {
             <Route path="/Organizer_Page" element={<Organizer_Page />} />
             <Route path="/User_Page" element={<User_Page users={users} setUsers={setUsers} />} />
             <Route path="/Organizer_New" element={<Organizer_New />} />
+            <Route path="/Categories_New" element={<Categories_New/>} />
+            <Route path="/Categories_Page" element={<Categories_Page/>}/>
+            <Route path="/event/:id" element={<Events_Details />} />
+            <Route path="/Squad_new" element={<Squad_new/>} />
+            <Route path="/Squad_Page" element={<Squad_Page/>}/>            
+            
           </Routes>
         </main>
       </div>

@@ -4,7 +4,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-const User_Page = () => {
+const Squad_Page = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -115,7 +115,7 @@ const User_Page = () => {
         </div>
       ) : (
         <>
-        <h1 className="text-center font-bold text-xl pb-4 text-blue-400">User Data</h1>
+        <h1 className="text-center font-bold text-xl pb-4 text-blue-400">Squad Data</h1>
         <div className="overflow-x-auto w-full max-w-6xl mx-auto">
           <table className="w-full border-collapse border border-gray-300 shadow-md rounded-lg">
             <thead className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
@@ -229,4 +229,4 @@ const User_Page = () => {
   );
 };
 
-export default User_Page;
+export default Squad_Page;
