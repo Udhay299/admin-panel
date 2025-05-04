@@ -1,84 +1,118 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { FiHome, FiUsers, FiCalendar, FiSettings, FiGrid } from "react-icons/fi"; 
+import { Link, useLocation } from "react-router-dom";
+import { FiHome, FiUsers, FiCalendar, FiSettings, FiGrid, FiLogOut } from "react-icons/fi";
 import { GiDarkSquad } from "react-icons/gi";
 
-const Navigation = () => {
+const Navigation = ({ handleLogout }) => {
   const [selectedIndex, setSelectedIndex] = useState(null);
+  const location = useLocation();
 
   const handleIndex = (index) => {
-    setSelectedIndex(index === selectedIndex ? null : index);
+    setSelectedIndex(selectedIndex === index ? null : index);
   };
 
   const sideMenuData = [
     { title: "Dashboard", path: "/Dashboard", icon: <FiHome className="text-xl" /> },
-    { title: "User Page", path: "/User_Page", icon: <FiUsers className="text-xl" /> },
-    { title: "Events Page", path: "/Events_Page", icon: <FiCalendar className="text-xl" /> },
+    { title: "User", path: "/User_Page", icon: <FiUsers className="text-xl" /> },
+    { title: "Events", path: "/Events_Page", icon: <FiCalendar className="text-xl" /> },
     {
       title: "Organizer",
-      icon: <FiSettings className="text-xl" />, 
+      icon: <FiSettings className="text-xl" />,
       options: [
-        { title: "Organizer Page", path: "/Organizer_Page" },
-        { title: "Organizer New", path: "/Organizer_New" },
+        { title: "Organizer", path: "/Organizer_Page" },
+        { title: "Organizer +", path: "/Organizer_New" },
       ],
     },
     {
       title: "Categories",
       icon: <FiGrid className="text-xl" />,
       options: [
-        { title: "Categories New", path: "/Categories_New" },
-        { title: "Categories Page", path: "/Categories_Page" },
+        { title: "Categories +", path: "/Categories_New" },
+        { title: "Categories", path: "/Categories_Page" },
       ],
     },
     {
       title: "Squad",
       icon: <GiDarkSquad className="text-xl" />,
       options: [
-        { title: "Squad New", path: "/Squad_New" },
-        { title: "Squad Page", path: "/Squad_Page" },
+        { title: "Squad +", path: "/Squad_New" },
+        { title: "Squad", path: "/Squad_Page" },
       ],
     },
   ];
 
+  const isActive = (path) => location.pathname === path;
+
   return (
-    <nav className="flex flex-col gap-2 p-6 text-white bg-gradient-to-b from-blue-700 to-indigo-800 w-64 min-h-screen shadow-lg">
-      {sideMenuData.map((item, index) => (
-        <div key={index} className="w-full">
-          {item.path ? (
-            <Link
-              to={item.path}
-              className="flex items-center gap-3 p-3 text-lg font-semibold hover:bg-blue-600 rounded-md transition"
-            >
-              {item.icon} {item.title}
-            </Link>
-          ) : (
-            <div>
-              <p
-                onClick={() => handleIndex(index)}
-                className="flex items-center justify-between p-3 text-lg font-semibold cursor-pointer hover:bg-blue-600 rounded-md transition"
+    <nav className="flex flex-col gap-2 p-6 text-white bg-gradient-to-b from-indigo-800 to-indigo-900 w-64 min-h-screen shadow-lg ">
+      {/* Logo / Title */}
+      <h1 className="text-2xl font-bold mb-6 text-center">Admin Panel</h1>
+
+      {/* Menu Items */}
+      <div className="flex-1 overflow-auto">
+        {sideMenuData.map((item, index) => (
+          <div key={index}>
+            {item.path ? (
+              <Link
+                to={item.path}
+                className={`flex items-center gap-3 p-3 text-lg font-medium rounded-md transition duration-200 ${
+                  isActive(item.path)
+                    ? "bg-white text-indigo-700 shadow-inner"
+                    : "hover:bg-indigo-700"
+                }`}
               >
-                <span className="flex items-center gap-3">
-                  {item.icon} {item.title}
-                </span>
-                <span>{selectedIndex === index ? "▲" : "▼"}</span>
-              </p>
-              {selectedIndex === index && (
-                <div className="ml-8 border-l-2 border-gray-400 pl-4">
-                  {item.options?.map((option, subIndex) => (
-                    <Link
-                      key={subIndex}
-                      to={option.path}
-                      className="block p-2 text-base font-medium hover:bg-blue-500 rounded-md transition"
-                    >
-                      {option.title}
-                    </Link>
-                  ))}
+                {item.icon}
+                {item.title}
+              </Link>
+            ) : (
+              <div>
+                <div
+                  onClick={() => handleIndex(index)}
+                  className="flex items-center justify-between cursor-pointer p-3 text-lg font-medium rounded-md hover:bg-indigo-700 transition"
+                >
+                  <span className="flex items-center gap-3">
+                    {item.icon}
+                    {item.title}
+                  </span>
+                  <span>{selectedIndex === index ? "▲" : "▼"}</span>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
-      ))}
+
+                {/* Submenu Items */}
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    selectedIndex === index ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div className="ml-8 mt-1 border-l border-indigo-400 pl-4">
+                    {item.options?.map((option, subIndex) => (
+                      <Link
+                        key={subIndex}
+                        to={option.path}
+                        className={`block py-2 px-3 rounded-md text-base font-medium transition duration-200 ${
+                          isActive(option.path)
+                            ? "bg-white text-indigo-700 shadow-inner"
+                            : "hover:bg-indigo-600"
+                        }`}
+                      >
+                        {option.title}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* 🔥 Logout Button (Fixed at the bottom) */}
+      <button
+        onClick={handleLogout}
+        className="flex items-center gap-3 p-3 mt-auto text-lg font-medium rounded-md bg-red-600 hover:bg-red-700 transition duration-200"
+      >
+        <FiLogOut className="text-xl" />
+        Logout
+      </button>
     </nav>
   );
 };

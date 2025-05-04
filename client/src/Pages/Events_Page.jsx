@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// Dummy Event Data
 const dummyEvents = [
   {
     _id: 3,
@@ -21,11 +22,14 @@ const dummyEvents = [
         hostedBy: 'John Doe',
         ticket_type: 'VIP',
         ticket_price: 50,
+        restrictions: ['No photography', 'VIP only'],
       },
     },
   },
+ 
 ];
 
+// EventCard Component
 const EventCard = ({ event }) => {
   const navigate = useNavigate();
 
@@ -36,21 +40,29 @@ const EventCard = ({ event }) => {
   return (
     <div
       onClick={handleClick}
-      className="border border-gray-200 rounded-xl shadow-md p-6 hover:shadow-lg transition duration-300 cursor-pointer max-w-3xl mx-auto"
+      className="w-72 bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg transition duration-300 cursor-pointer p-4"
     >
-      <h3 className="text-2xl font-semibold text-gray-800 mb-2">{event.name}</h3>
-      <p className="text-sm text-gray-600 mb-1">📍 {event.location}</p>
-      <p className="text-sm text-gray-600 mb-1">📅 {new Date(event.starting_date).toDateString()} - {new Date(event.ending_date).toDateString()}</p>
-      <p className="text-sm text-gray-600 mb-3">📁 Category: {event.category}</p>
-      <div className="flex gap-2 flex-wrap mb-3">
+      <h3 className="text-lg font-semibold text-gray-800 mb-1">{event.name}</h3>
+      <p className="text-xs text-gray-600 mb-1">📍 {event.location}</p>
+      <p className="text-xs text-gray-600 mb-1">
+        📅 {new Date(event.starting_date).toDateString()} - {new Date(event.ending_date).toDateString()}
+      </p>
+      <p className="text-xs text-gray-600 mb-2">📁 Category: {event.category}</p>
+      <div className="flex gap-2 flex-wrap">
         {event.tags.map((tag, index) => (
-          <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">#{tag}</span>
+          <span
+            key={index}
+            className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full"
+          >
+            #{tag}
+          </span>
         ))}
       </div>
     </div>
   );
 };
 
+// Events_Page Component
 const Events_Page = () => {
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
@@ -64,18 +76,20 @@ const Events_Page = () => {
   }, []);
 
   return (
-    <div className="p-8 min-h-screen">
+    <div className="p-6 min-h-screen bg-gray-50">
       {loading ? (
         <div className="flex justify-center items-center h-screen">
           <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
         </div>
       ) : (
-        <div className="space-y-10">
-          <h1 className="text-3xl font-bold text-center text-gray-800 mb-10">Upcoming Events</h1>
-          {events.map((event) => (
-            <EventCard key={event._id} event={event} />
-          ))}
-        </div>
+        <>
+          <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Upcoming Events</h1>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">
+            {events.map((event) => (
+              <EventCard key={event._id} event={event} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

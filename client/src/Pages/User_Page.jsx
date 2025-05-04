@@ -6,9 +6,13 @@ import "slick-carousel/slick/slick-theme.css";
 
 const User_Page = () => {
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 5;
 
   useEffect(() => {
     const fetchDummyUsers = async () => {
@@ -50,8 +54,8 @@ const User_Page = () => {
           location: city,
           role,
           proof: [
-            `https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`,
-            `https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`,
+            `https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=2574&auto=format&fit=crop`,
+            `https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=2574&auto=format&fit=crop`,
           ],
           bookingData: [
             {
@@ -73,11 +77,24 @@ const User_Page = () => {
       });
 
       setUsers(data);
+      setFilteredUsers(data);
       setLoading(false);
     };
 
     fetchDummyUsers();
   }, []);
+
+  useEffect(() => {
+    const lower = searchQuery.toLowerCase();
+    const filtered = users.filter(
+      (user) =>
+        user.name.toLowerCase().includes(lower) ||
+        user.email.toLowerCase().includes(lower) ||
+        user.mobile.includes(lower)
+    );
+    setFilteredUsers(filtered);
+    setCurrentPage(1);
+  }, [searchQuery, users]);
 
   const handleViewClick = (user) => {
     setSelectedUser(user);
@@ -91,7 +108,12 @@ const User_Page = () => {
 
   const handleActivateUser = () => {
     if (selectedUser) {
-      setSelectedUser({ ...selectedUser, status: "active" });
+      const updatedUser = { ...selectedUser, status: "active" };
+      const updatedUsers = users.map((u) =>
+        u._id === updatedUser._id ? updatedUser : u
+      );
+      setUsers(updatedUsers);
+      setSelectedUser(updatedUser);
     }
   };
 
@@ -105,60 +127,94 @@ const User_Page = () => {
     autoplaySpeed: 2000,
   };
 
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
   return (
     <div className="p-10 min-h-screen">
-
-
       {loading ? (
         <div className="flex justify-center items-center h-screen">
           <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
         </div>
       ) : (
         <>
-        <h1 className="text-center font-bold text-xl pb-4 text-blue-400">User Data</h1>
-        <div className="overflow-x-auto w-full max-w-6xl mx-auto">
-          <table className="w-full border-collapse border border-gray-300 shadow-md rounded-lg">
-            <thead className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
-              <tr>
-                <th className="p-3 text-left">User id</th>
-                <th className="p-3 text-left">User Name</th>
-                <th className="p-3 text-left">Email</th>
-                <th className="p-3 text-left">Phone Number</th>
-                <th className="p-3 text-left">Status</th>
-                <th className="p-3 text-left">Location</th>
-                <th className="p-3 text-center">View</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr
-                  key={user._id}
-                  className="hover:bg-gray-100 transition duration-300"
-                >
-                  <td className="p-3 text-left">{user._id}</td>
-                  <td className="p-3 text-left">{user.name}</td>
-                  <td className="p-3 text-left">{user.email}</td>
-                  <td className="p-3 text-left">
-                    {user.c_code} {user.mobile}
-                  </td>
-                  <td className="p-3 text-left">{user.status}</td>
-                  <td className="p-3 text-left">{user.location}</td>
-                  <td className="p-3 text-center">
-                    <button
-                      onClick={() => handleViewClick(user)}
-                      className="text-green-500 hover:text-green-700"
-                    >
-                      <FaEye size={20} />
-                    </button>
-                  </td>
+          <h1 className="text-center font-bold text-xl pb-4 text-blue-400">USER DATA</h1>
+
+          {/* Search bar */}
+          <div className="mb-6 max-w-md mx-auto">
+            <input
+              type="text"
+              placeholder="Search by name, email, or phone"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+            />
+          </div>
+
+          <div className="overflow-x-auto w-full max-w-6xl mx-auto">
+            <table className="w-full border-collapse border border-gray-300 shadow-md rounded-lg">
+              <thead className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
+                <tr>
+                  <th className="p-3 text-left">User id</th>
+                  <th className="p-3 text-left">User Name</th>
+                  <th className="p-3 text-left">Email</th>
+                  <th className="p-3 text-left">Phone Number</th>
+                  <th className="p-3 text-left">Status</th>
+                  <th className="p-3 text-left">Location</th>
+                  <th className="p-3 text-center">View</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {currentUsers.map((user) => (
+                  <tr key={user._id} className="hover:bg-gray-100 transition duration-300">
+                    <td className="p-3">{user._id}</td>
+                    <td className="p-3">{user.name}</td>
+                    <td className="p-3">{user.email}</td>
+                    <td className="p-3">
+                      {user.c_code} {user.mobile}
+                    </td>
+                    <td className="p-3">{user.status}</td>
+                    <td className="p-3">{user.location}</td>
+                    <td className="p-3 text-center">
+                      <button
+                        onClick={() => handleViewClick(user)}
+                        className="text-green-500 hover:text-green-700"
+                      >
+                        <FaEye size={20} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Pagination controls */}
+            <div className="flex justify-center items-center mt-6 gap-2">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50"
+                disabled={currentPage === 1}
+              >
+                Prev
+              </button>
+              <span className="px-4 text-gray-700 font-semibold">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50"
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+          </div>
         </>
       )}
 
+      {/* Modal remains unchanged */}
       {isViewModalOpen && selectedUser && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
           <div className="bg-white rounded-lg shadow-lg w-[900px] h-[85vh] flex overflow-hidden">
@@ -170,7 +226,6 @@ const User_Page = () => {
                       src={image}
                       alt={`Proof ${index + 1}`}
                       className="w-full h-full object-cover object-center rounded-l-lg"
-
                     />
                   </div>
                 ))}
