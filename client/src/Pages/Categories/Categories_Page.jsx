@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const Categories_Page = () => {
   const [categories, setCategories] = useState([]);
@@ -7,15 +8,47 @@ const Categories_Page = () => {
   const [newName, setNewName] = useState("");
   const [newImage, setNewImage] = useState(null);
 
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const limit = 6;
+
   useEffect(() => {
-    const storedCategories = JSON.parse(localStorage.getItem("categories")) || [];
-    setCategories(storedCategories);
-  }, []);
+    fetchCategories();
+  }, [page, search]);
+
+  const fetchCategories = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.post(
+        "http://localhost:3000/api/v1/admin/categories",
+        { page, limit, search },
+        {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const fetchedCategories = response?.data?.data?.categories || [];
+      const totalCount = response?.data?.data?.totalCount || 0;
+      setCategories(fetchedCategories);
+      setTotalPages(Math.ceil(totalCount / limit));
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+    setPage(1); // reset to page 1 on new search
+  };
 
   const handleDelete = (id) => {
     const updatedCategories = categories.filter((category) => category.id !== id);
     setCategories(updatedCategories);
-    localStorage.setItem("categories", JSON.stringify(updatedCategories));
+    // Optional: call API to delete
   };
 
   const handleToggle = (id) => {
@@ -23,7 +56,7 @@ const Categories_Page = () => {
       category.id === id ? { ...category, isActive: !category.isActive } : category
     );
     setCategories(updatedCategories);
-    localStorage.setItem("categories", JSON.stringify(updatedCategories));
+    // Optional: call API to update
   };
 
   const handleEdit = (category) => {
@@ -41,18 +74,37 @@ const Categories_Page = () => {
 
     const updatedCategories = categories.map((category) =>
       category.id === currentCategory.id
-        ? { ...category, name: newName, image: newImage ? URL.createObjectURL(newImage) : category.image }
+        ? {
+            ...category,
+            name: newName,
+            image: newImage ? URL.createObjectURL(newImage) : category.image,
+          }
         : category
     );
 
     setCategories(updatedCategories);
-    localStorage.setItem("categories", JSON.stringify(updatedCategories));
     setIsEditing(false);
+    // Optional: call API to update
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setPage(newPage);
+    }
   };
 
   return (
     <div className="p-10">
       <h2 className="text-2xl font-bold mb-4">Categories List</h2>
+
+      <input
+        type="text"
+        placeholder="Search categories..."
+        value={search}
+        onChange={handleSearchChange}
+        className="mb-4 p-2 border rounded w-full"
+      />
+
       <table className="w-full border-collapse border border-gray-300 shadow-md">
         <thead className="bg-gray-200 text-gray-700">
           <tr>
@@ -69,25 +121,30 @@ const Categories_Page = () => {
               <td className="p-3 border">{category.id}</td>
               <td className="p-3 border">{category.name}</td>
               <td className="p-3 border">
-                <img src={category.image} alt={category.name} className="w-16 h-16 object-cover rounded" />
+                <img
+                  src={category.image}
+                  alt={category.name}
+                  className="w-16 h-16 object-cover rounded"
+                />
               </td>
               <td className="p-3 border">
-                <button onClick={() => handleEdit(category)} className="bg-yellow-500 text-white px-2 py-1 rounded mr-2">
+                <button
+                  onClick={() => handleEdit(category)}
+                  className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
+                >
                   Update
                 </button>
-                <button onClick={() => handleDelete(category.id)} className="bg-red-500 text-white px-2 py-1 rounded">
+                <button
+                  onClick={() => handleDelete(category.id)}
+                  className="bg-red-500 text-white px-2 py-1 rounded"
+                >
                   Delete
                 </button>
               </td>
               <td className="p-3 border">
                 <label className="flex items-center justify-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={category.isActive}
-                    onChange={() => handleToggle(category.id)}
-                    className="hidden"
-                  />
                   <div
+                    onClick={() => handleToggle(category.id)}
                     className={`w-12 h-6 flex items-center bg-gray-300 rounded-full p-1 transition ${
                       category.isActive ? "bg-green-500" : "bg-gray-400"
                     }`}
@@ -105,7 +162,28 @@ const Categories_Page = () => {
         </tbody>
       </table>
 
-      {/* Popup Modal for Updating Category */}
+      {/* Pagination */}
+      <div className="flex justify-center items-center mt-6 gap-4">
+        <button
+          onClick={() => handlePageChange(page - 1)}
+          disabled={page <= 1}
+          className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+        >
+          Prev
+        </button>
+        <span className="text-lg">
+          Page {page} of {totalPages}
+        </span>
+        <button
+          onClick={() => handlePageChange(page + 1)}
+          disabled={page >= totalPages}
+          className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+
+      {/* Popup Modal */}
       {isEditing && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded shadow-lg w-96">
@@ -126,10 +204,16 @@ const Categories_Page = () => {
               className="w-full p-2 border rounded mb-4"
             />
             <div className="flex justify-end gap-3">
-              <button onClick={() => setIsEditing(false)} className="bg-gray-500 text-white px-4 py-2 rounded">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="bg-gray-500 text-white px-4 py-2 rounded"
+              >
                 Cancel
               </button>
-              <button onClick={handleSaveChanges} className="bg-blue-500 text-white px-4 py-2 rounded">
+              <button
+                onClick={handleSaveChanges}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+              >
                 Save Changes
               </button>
             </div>

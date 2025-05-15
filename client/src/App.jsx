@@ -43,9 +43,7 @@ const App = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-md py-4 px-6">
-          <h1 className="text-xl font-semibold text-gray-800">Admin Dashboard</h1>
-        </header>
+       
 
         <main className="flex-1 p-6 overflow-auto">
           <Routes>

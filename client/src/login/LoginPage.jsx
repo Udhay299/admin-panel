@@ -16,11 +16,13 @@ const LoginPage = ({ setIsLoggedIn }) => {
         password,
       });
 
-      console.log('✅ Login Response:', response.data);
+      console.log('✅ Login Response:', response.data.data.accessToken);
 
       // ✅ Extract token from response
-      const token = response.data.token;
+      const token = response.data.data.accessToken;
+      console.log(`TOEKN : -> ${token}`)
       if (token) {
+        console.log("TOEKN SETTED")
         // ✅ Store token in localStorage
         localStorage.setItem('authToken', token);
         console.log('🔐 Token saved to localStorage:', token);

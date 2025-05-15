@@ -44,12 +44,8 @@ const Navigation = ({ handleLogout }) => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="flex flex-col gap-2 p-6 text-white bg-gradient-to-b from-indigo-800 to-indigo-900 w-64 min-h-screen shadow-lg ">
-      {/* Logo / Title */}
-      <h1 className="text-2xl font-bold mb-6 text-center">Admin Panel</h1>
-
-      {/* Menu Items */}
-      <div className="flex-1 overflow-auto">
+    <nav className="flex flex-col gap-2 p-6 text-white bg-gradient-to-b from-indigo-800 to-indigo-900 w-64 min-h-screen shadow-lg">
+      <div className="flex flex-col gap-2 overflow-auto">
         {sideMenuData.map((item, index) => (
           <div key={index}>
             {item.path ? (
@@ -76,8 +72,6 @@ const Navigation = ({ handleLogout }) => {
                   </span>
                   <span>{selectedIndex === index ? "▲" : "▼"}</span>
                 </div>
-
-                {/* Submenu Items */}
                 <div
                   className={`overflow-hidden transition-all duration-300 ${
                     selectedIndex === index ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
@@ -103,16 +97,16 @@ const Navigation = ({ handleLogout }) => {
             )}
           </div>
         ))}
-      </div>
 
-      {/* 🔥 Logout Button (Fixed at the bottom) */}
-      <button
-        onClick={handleLogout}
-        className="flex items-center gap-3 p-3 mt-auto text-lg font-medium rounded-md bg-red-600 hover:bg-red-700 transition duration-200"
-      >
-        <FiLogOut className="text-xl" />
-        Logout
-      </button>
+        {/* Logout button placed right after the Squad menu */}
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 p-3 text-lg font-medium rounded-md bg-red-600 hover:bg-red-700 transition duration-200"
+        >
+          <FiLogOut className="text-xl" />
+          Logout
+        </button>
+      </div>
     </nav>
   );
 };
